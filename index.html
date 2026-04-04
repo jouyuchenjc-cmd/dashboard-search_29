@@ -40,7 +40,7 @@
     display: flex; flex-direction: column; gap: 16px;
   }
   .search-wrap input {
-    flex: 1; min-width: 140px; width: 100%; padding: 16px 24px; font-size: 16px;
+    flex: 1; min-width: 140px; width: 100%; padding: 16px 24px;
     border: 1.5px solid var(--color-surface-low);
     border-radius: 8px; background: var(--color-surface);
     color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
@@ -141,7 +141,6 @@
   <input id="inputClinic" type="text"
     placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
-  
   <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
 </div>
 
@@ -155,10 +154,7 @@
 <script>
 const N8N_WEBHOOK_URL = 'https://alleypin.app.n8n.cloud/webhook/contract-dashboard';
 
-let currentQuery   = '';
-let refreshTimer   = null;
-let countdownTimer = null;
-let secondsLeft    = 60;
+let currentQuery = '';
 
 const inputAM     = document.getElementById('inputAM');
 const inputClinic = document.getElementById('inputClinic');
@@ -171,14 +167,9 @@ const dot         = document.getElementById('dot');
 const saved = localStorage.getItem('last_query');
 if (saved && saved.includes('||')) {
   const [am, clinic] = saved.split('||');
-  inputAM.value = am;
-  if (clinic.toUpperCase() === '__ALL__') {
-    document.getElementById('inputAll').checked = true;
-  } else {
-    inputClinic.value = clinic;
-  }
+  inputAM.value     = am;
+  inputClinic.value = clinic === 'all' ? 'all' : clinic;
 }
-
 
 inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
 inputClinic.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
@@ -190,37 +181,36 @@ function doSearch() {
     output.innerHTML = '<div class="message error">請同時輸入 AM Name 及 Clinic Name</div>';
     return;
   }
-  const isAll  = clinic.toLowerCase() === 'all';
-currentQuery = isAll ? `${am}||all` : `${am}||${clinic}`;
+  currentQuery = `${am}||${clinic.toLowerCase() === 'all' ? 'all' : clinic}`;
   localStorage.setItem('last_query', currentQuery);
-  clearTimeout(refreshTimer);
-  clearInterval(countdownTimer);
-  fetchData(true);
+  fetchData();
 }
 
-async function fetchData(isManual = false) {
-  if (!currentQuery) return;
-  if (isManual) {
-    btn.disabled = true;
-    dot.className = 'dot';
-    statusText.innerHTML = '查詢中…';
-    output.innerHTML = '<div class="message loading">載入中…</div>';
-  }
+async function fetchData() {
+  btn.disabled = true;
+  dot.className = 'dot';
+  statusText.innerHTML = '查詢中…';
+  output.innerHTML = '<div class="message loading">載入中…</div>';
+
   try {
     const res  = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
       method: 'GET',
     });
     const json = await res.json();
+
     if (json.error) {
       dot.className = 'dot';
       statusText.innerHTML = json.message || '查無資料';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else if (json.mode === 'stats') {
-  dot.className = 'dot live';
-} else {
-  dot.className = 'dot live';
-  renderContracts(json.contracts);
-}
+      dot.className = 'dot live';
+      renderStats(json.stats);
+      tick();
+    } else {
+      dot.className = 'dot live';
+      renderContracts(json.contracts);
+      tick();
+    }
   } catch {
     dot.className = 'dot';
     statusText.innerHTML = '連線失敗，請稍後重試';
@@ -233,7 +223,6 @@ function tick() {
   const t = new Date().toLocaleTimeString('zh-TW');
   statusText.innerHTML = `已載入 ${t}`;
 }
-
 
 function signerStatus(s) {
   if (!s) return 'waiting';
@@ -250,6 +239,7 @@ function signerLabel(s) {
   if (l === 'delivered') return '已送達';
   return s;
 }
+
 function renderStats(s) {
   output.innerHTML = `
     <div class="results">
@@ -272,7 +262,7 @@ function renderStats(s) {
       </div>
     </div>`;
 }
-  
+
 function renderContracts(contracts) {
   if (!contracts || contracts.length === 0) {
     output.innerHTML = '<div class="message empty">找不到合約紀錄</div>';
