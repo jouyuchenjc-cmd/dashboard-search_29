@@ -141,9 +141,7 @@
   <input id="inputClinic" type="text"
     placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
-    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--color-text-s); cursor:pointer; padding: 4px 0;">
-    <input type="checkbox" id="inputAll"> 顯示過去 2 週所有合約
-  </label>
+  
   <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
 </div>
 
@@ -218,9 +216,10 @@ async function fetchData(isManual = false) {
       statusText.innerHTML = json.message || '查無資料';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else {
-      dot.className = 'dot live';
-      renderContracts(json.contracts);
-      startCountdown();
+     dot.className = 'dot live';
+renderContracts(json.contracts);
+tick();
+
     }
   } catch {
     dot.className = 'dot';
@@ -245,8 +244,9 @@ function startCountdown() {
 
 function tick() {
   const t = new Date().toLocaleTimeString('zh-TW');
-  statusText.innerHTML = `已載入 ${t} · ${secondsLeft} 秒後自動更新`;
+  statusText.innerHTML = `已載入 ${t}`;
 }
+
 
 function signerStatus(s) {
   if (!s) return 'waiting';
