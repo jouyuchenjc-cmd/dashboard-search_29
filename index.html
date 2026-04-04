@@ -8,29 +8,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --color-bg:              #EDE8DF;
-    --color-surface:         #F5F2EC;
-    --color-surface-low:     #D9D3C7;
-    --color-text:            #2C3A4A;
-    --color-text-secondary:  #5A6A7A;
-    --color-text-disabled:   #9AABB8;
-    --color-primary:         #548EB8;
-    --color-primary-light:   #97AFCA;
-    --color-primary-dark:    #4C7A91;
-    --color-primary-subtle:  #BAC2D0;
-    --color-cta:             #C66240;
-    --color-success:         #4A7A65;
-    --color-success-subtle:  #C5D9D2;
-    --color-warning:         #9A7845;
-    --color-warning-subtle:  #E5D8BE;
-    --color-danger:          #D28187;
-    --color-danger-subtle:   #E9D7D5;
-    --shadow-1: 0 1px 3px rgba(44,58,74,.12), 0 1px 2px rgba(44,58,74,.08);
-    --shadow-2: 0 4px 8px rgba(44,58,74,.12), 0 2px 4px rgba(44,58,74,.08);
+    --color-bg:          #EDE8DF;
+    --color-surface:     #F5F2EC;
+    --color-surface-low: #D9D3C7;
+    --color-text:        #2C3A4A;
+    --color-text-s:      #5A6A7A;
+    --color-text-d:      #9AABB8;
+    --color-primary:     #548EB8;
+    --color-primary-d:   #4C7A91;
+    --color-primary-sub: #BAC2D0;
+    --color-success:     #4A7A65;
+    --color-success-sub: #C5D9D2;
+    --color-warning:     #9A7845;
+    --color-warning-sub: #E5D8BE;
+    --shadow: 0 4px 8px rgba(44,58,74,.12), 0 2px 4px rgba(44,58,74,.08);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: var(--color-bg);
     color: var(--color-text);
@@ -38,276 +31,110 @@
     min-height: 100vh;
     padding: 32px 16px 64px;
   }
+  .header { max-width: 720px; margin: 0 auto 28px; }
+  .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .header p  { font-size: 13px; color: var(--color-text-s); }
 
-  /* ── Header ── */
-  .header {
-    max-width: 720px;
-    margin: 0 auto 32px;
-  }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 4px;
-  }
-  .header p {
-    font-size: 13px;
-    color: var(--color-text-secondary);
-  }
-
-  /* ── Search Box ── */
-  .search-wrap {
-    max-width: 720px;
-    margin: 0 auto 28px;
-    display: flex;
-    gap: 10px;
-  }
+  .search-wrap { max-width: 720px; margin: 0 auto 20px; display: flex; gap: 8px; }
   .search-wrap input {
-    flex: 1;
-    height: 46px;
-    padding: 0 16px;
+    flex: 1; height: 44px; padding: 0 14px;
     border: 1.5px solid var(--color-surface-low);
-    border-radius: 8px;
-    background: var(--color-surface);
-    color: var(--color-text);
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
+    border-radius: 8px; background: var(--color-surface);
+    color: var(--color-text); font-size: 14px; font-family: inherit; outline: none;
     transition: border-color .15s;
   }
-  .search-wrap input:focus {
-    border-color: var(--color-primary);
-  }
-  .search-wrap input::placeholder {
-    color: var(--color-text-disabled);
-  }
+  .search-wrap input:focus { border-color: var(--color-primary); }
+  .search-wrap input::placeholder { color: var(--color-text-d); }
   .btn {
-    height: 46px;
-    padding: 0 22px;
-    background: var(--color-primary);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background .15s;
-    white-space: nowrap;
+    height: 44px; padding: 0 20px;
+    background: var(--color-primary); color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: background .15s; white-space: nowrap;
   }
-  .btn:hover { background: var(--color-primary-dark); }
-  .btn:disabled { background: var(--color-primary-subtle); cursor: not-allowed; }
+  .btn:hover    { background: var(--color-primary-d); }
+  .btn:disabled { background: var(--color-primary-sub); cursor: not-allowed; }
 
-  /* ── Status bar ── */
   .status-bar {
-    max-width: 720px;
-    margin: 0 auto 12px;
-    font-size: 12px;
-    color: var(--color-text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 20px;
+    max-width: 720px; margin: 0 auto 14px;
+    font-size: 12px; color: var(--color-text-s);
+    display: flex; align-items: center; gap: 7px; min-height: 20px;
   }
-  .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--color-text-disabled);
-    flex-shrink: 0;
-  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-d); flex-shrink: 0; }
   .dot.live { background: var(--color-success); animation: pulse 2s infinite; }
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50%      { opacity: .4; }
-  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-  /* ── Message states ── */
   .message {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    text-align: center;
+    max-width: 720px; margin: 0 auto;
+    padding: 20px; border-radius: 8px;
+    font-size: 14px; text-align: center;
   }
-  .message.error   { background: var(--color-danger-subtle);  color: var(--color-danger); }
-  .message.empty   { background: var(--color-surface);        color: var(--color-text-secondary); }
-  .message.loading { background: var(--color-surface);        color: var(--color-text-secondary); }
+  .message.error   { background: #E9D7D5; color: #D28187; }
+  .message.empty   { background: var(--color-surface); color: var(--color-text-s); }
+  .message.loading { background: var(--color-surface); color: var(--color-text-s); }
 
-  /* ── Contract Cards ── */
-  .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-
-  .card {
-    background: var(--color-surface);
-    border-radius: 12px;
-    box-shadow: var(--shadow-2);
-    overflow: hidden;
-  }
-
+  .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
   .card-head {
-    padding: 16px 20px 14px;
+    padding: 14px 18px 12px;
     border-bottom: 1px solid var(--color-surface-low);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
-  .clinic-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-text);
-    line-height: 1.3;
-  }
+  .clinic-name { font-size: 15px; font-weight: 600; }
   .renewal-badge {
     flex-shrink: 0;
-    background: var(--color-primary-subtle);
-    color: var(--color-primary-dark);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 9999px;
-    margin-top: 2px;
+    background: var(--color-primary-sub); color: var(--color-primary-d);
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 9999px;
   }
-
-  /* ── Progress Track ── */
-  .progress-wrap {
-    padding: 20px 20px 8px;
-  }
-  .track {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
-    position: relative;
-  }
-  .step {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-  }
-  /* connector line */
+  .progress-wrap { padding: 18px 18px 6px; }
+  .track { display: flex; align-items: flex-start; }
+  .step  { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
   .step:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background: var(--color-surface-low);
-    z-index: 0;
-    transition: background .3s;
+    content: ''; position: absolute; top: 13px; left: 50%;
+    width: 100%; height: 2px; background: var(--color-surface-low); z-index: 0;
   }
-  .step.done:not(:last-child)::after {
-    background: var(--color-success);
-  }
-
+  .step.done:not(:last-child)::after { background: var(--color-success); }
   .step-icon {
-    width: 28px; height: 28px;
-    border-radius: 50%;
+    width: 26px; height: 26px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-    position: relative;
-    z-index: 1;
+    font-size: 12px; font-weight: 700; position: relative; z-index: 1;
     border: 2px solid var(--color-surface-low);
-    background: var(--color-surface);
-    color: var(--color-text-disabled);
-    transition: all .2s;
+    background: var(--color-surface); color: var(--color-text-d);
   }
-  .step.done .step-icon {
-    background: var(--color-success);
-    border-color: var(--color-success);
-    color: #fff;
-  }
-  .step.pending .step-icon {
-    background: var(--color-warning-subtle);
-    border-color: var(--color-warning);
-    color: var(--color-warning);
-  }
-
-  .step-label {
-    margin-top: 8px;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    text-align: center;
-    line-height: 1.3;
-  }
-  .step.done .step-label { color: var(--color-success); }
+  .step.done    .step-icon { background: var(--color-success);     border-color: var(--color-success); color: #fff; }
+  .step.pending .step-icon { background: var(--color-warning-sub); border-color: var(--color-warning); color: var(--color-warning); }
+  .step-label { margin-top: 7px; font-size: 10px; font-weight: 500; color: var(--color-text-s); text-align: center; }
+  .step.done    .step-label { color: var(--color-success); }
   .step.pending .step-label { color: var(--color-warning); }
-
   .step-name {
-    margin-top: 3px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text);
-    text-align: center;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    margin-top: 2px; font-size: 11px; font-weight: 600; color: var(--color-text);
+    text-align: center; max-width: 84px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-
-  /* ── Signed DateTime row ── */
-  .signed-row {
-    padding: 4px 20px 18px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4px;
+  .dates { padding: 4px 18px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  .date-cell { font-size: 10px; color: var(--color-text-d); text-align: center; line-height: 1.5; }
+  .date-cell.done { color: var(--color-text-s); }
+  .date-cell span { display: block; font-size: 9px; color: var(--color-text-d); margin-bottom: 1px; text-transform: uppercase; letter-spacing: .04em; }
+  .overall {
+    margin: 0 18px 14px; padding: 7px 12px;
+    border-radius: 8px; font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
   }
-  .signed-cell {
-    font-size: 10.5px;
-    color: var(--color-text-disabled);
-    text-align: center;
-    line-height: 1.4;
-  }
-  .signed-cell.done {
-    color: var(--color-text-secondary);
-  }
-  .signed-cell span {
-    display: block;
-    font-size: 9px;
-    color: var(--color-text-disabled);
-    margin-bottom: 1px;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-  }
-
-  /* ── Overall status chip ── */
-  .overall-status {
-    margin: 0 20px 16px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .overall-status.all-done {
-    background: var(--color-success-subtle);
-    color: var(--color-success);
-  }
-  .overall-status.in-progress {
-    background: var(--color-warning-subtle);
-    color: var(--color-warning);
-  }
-
-  /* ── Refresh countdown ── */
-  #countdown { font-variant-numeric: tabular-nums; }
+  .all-done    { background: var(--color-success-sub); color: var(--color-success); }
+  .in-progress { background: var(--color-warning-sub); color: var(--color-warning); }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>系統合約續約 — 簽署進度</h1>
-  <p>輸入 AM Email 或客戶名稱查詢對應合約</p>
+  <p>輸入 AM Email 或 Clinic Name 查詢對應合約</p>
 </div>
 
 <div class="search-wrap">
   <input id="searchInput" type="text"
-    placeholder="AM Email 或 Signer 3 客戶名稱"
+    placeholder="AM Email 或 Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
   <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
 </div>
@@ -320,14 +147,15 @@
 <div id="output"></div>
 
 <script>
-// ── 請在部署 Apps Script 後把 URL 貼在這裡 ──
+// ── 貼上你的 Apps Script Web App URL ──
 const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/alleypin.com/s/AKfycbzblJAFj7TqcTrWHXO134TzOWQ7QRldNAB9wr-nRRlEJxxLWvuJUi78Q30OklSPAoCI/exec';
-// ────────────────────────────────────────────
+// ──────────────────────────────────────
 
 let currentQuery   = '';
 let refreshTimer   = null;
 let countdownTimer = null;
 let secondsLeft    = 60;
+let cbCounter      = 0;
 
 const input      = document.getElementById('searchInput');
 const btn        = document.getElementById('searchBtn');
@@ -335,93 +163,92 @@ const output     = document.getElementById('output');
 const statusText = document.getElementById('statusText');
 const dot        = document.getElementById('dot');
 
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
-});
+input.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
 function doSearch() {
   const q = input.value.trim();
   if (!q) return;
   currentQuery = q;
-  clearInterval(refreshTimer);
+  clearTimeout(refreshTimer);
   clearInterval(countdownTimer);
   fetchData(true);
 }
 
-async function fetchData(isManual = false) {
+// JSONP fetch — 繞過 CORS 限制
+function fetchData(isManual = false) {
   if (!currentQuery) return;
-
   if (isManual) {
     btn.disabled = true;
-    setStatus('loading', '查詢中...');
+    dot.className = 'dot';
+    statusText.innerHTML = '查詢中…';
     output.innerHTML = '<div class="message loading">載入中…</div>';
   }
 
-  try {
-    const url = `${APPS_SCRIPT_URL}?q=${encodeURIComponent(currentQuery)}`;
-    const res  = await fetch(url);
-    const json = await res.json();
+  const cbName = `_cb${cbCounter++}`;
+  const script = document.createElement('script');
+  const timer  = setTimeout(() => {
+    cleanup();
+    dot.className = 'dot';
+    statusText.innerHTML = '連線逾時，請稍後重試';
+    output.innerHTML = '<div class="message error">請求逾時，請稍後再試</div>';
+    btn.disabled = false;
+  }, 10000);
 
+  function cleanup() {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+
+  window[cbName] = function(json) {
+    cleanup();
+    btn.disabled = false;
     if (json.error) {
       dot.className = 'dot';
-      setStatus('', json.message || '查無資料');
+      statusText.innerHTML = json.message || '查無資料';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else {
       dot.className = 'dot live';
       renderContracts(json.contracts);
       startCountdown();
     }
-  } catch (err) {
-    dot.className = 'dot';
-    setStatus('', '連線失敗，請稍後重試');
-    output.innerHTML = '<div class="message error">無法連線至資料來源，請確認 Apps Script URL 設定</div>';
-  }
+  };
 
-  btn.disabled = false;
+  script.src = `${APPS_SCRIPT_URL}?q=${encodeURIComponent(currentQuery)}&callback=${cbName}`;
+  document.head.appendChild(script);
 }
 
 function startCountdown() {
-  clearInterval(refreshTimer);
+  clearTimeout(refreshTimer);
   clearInterval(countdownTimer);
   secondsLeft = 60;
-  updateCountdownText();
-
+  tick();
   countdownTimer = setInterval(() => {
     secondsLeft--;
-    updateCountdownText();
-    if (secondsLeft <= 0) {
-      clearInterval(countdownTimer);
-    }
+    tick();
+    if (secondsLeft <= 0) clearInterval(countdownTimer);
   }, 1000);
-
-  refreshTimer = setTimeout(() => {
-    fetchData(false);
-  }, 60000);
+  refreshTimer = setTimeout(() => fetchData(false), 60000);
 }
 
-function updateCountdownText() {
-  setStatus('', `已載入 ${new Date().toLocaleTimeString('zh-TW')} · <span id="countdown">${secondsLeft}</span> 秒後自動更新`);
+function tick() {
+  const t = new Date().toLocaleTimeString('zh-TW');
+  statusText.innerHTML = `已載入 ${t} · ${secondsLeft} 秒後自動更新`;
 }
 
-function setStatus(type, msg) {
-  statusText.innerHTML = msg;
-}
-
-// ── 狀態判斷 ──
-function stepStatus(s) {
+function signerStatus(s) {
   if (!s) return 'waiting';
-  const lower = s.toLowerCase();
-  if (lower === 'completed') return 'done';
-  if (lower === 'sent' || lower === 'delivered') return 'pending';
+  const l = s.toLowerCase();
+  if (l === 'completed') return 'done';
+  if (l === 'sent' || l === 'delivered') return 'pending';
   return 'waiting';
 }
-
-function stepLabel(s) {
+function signerLabel(s) {
   if (!s) return '待送出';
-  const lower = s.toLowerCase();
-  if (lower === 'completed') return '已簽署';
-  if (lower === 'sent')      return '待簽署';
-  if (lower === 'delivered') return '已送達';
+  const l = s.toLowerCase();
+  if (l === 'completed') return '已簽署';
+  if (l === 'sent')      return '待簽署';
+  if (l === 'delivered') return '已送達';
   return s;
 }
 
@@ -430,39 +257,27 @@ function renderContracts(contracts) {
     output.innerHTML = '<div class="message empty">找不到合約紀錄</div>';
     return;
   }
-
   const html = contracts.map(c => {
-    const s1 = stepStatus(c.signer1Status);
-    const s2 = stepStatus(c.signer2Status);
-    const s3 = stepStatus(c.signer3Status);
-
-    const allDone    = s1 === 'done' && s2 === 'done' && s3 === 'done';
-    const doneCount  = [s1,s2,s3].filter(x => x === 'done').length;
-
-    const overallHTML = allDone
-      ? `<div class="overall-status all-done">✓ 三方簽署完成</div>`
-      : `<div class="overall-status in-progress">⧖ 進行中 ${doneCount}/3 已簽署</div>`;
-
-    const signerDefs = [
-      { role: 'AM',    name: c.signer1Name, status: s1, label: stepLabel(c.signer1Status), date: c.signer1SignedAt },
-      { role: '財務',  name: c.signer2Name, status: s2, label: stepLabel(c.signer2Status), date: c.signer2SignedAt },
-      { role: '客戶',  name: c.signer3Name, status: s3, label: stepLabel(c.signer3Status), date: c.signer3SignedAt },
+    const signers = [
+      { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+      { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+      { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
     ];
+    const doneCount = signers.filter(s => s.st === 'done').length;
+    const allDone   = doneCount === 3;
 
-    const stepsHTML = signerDefs.map((sg, i) => `
-      <div class="step ${sg.status}">
-        <div class="step-icon">${sg.status === 'done' ? '✓' : (i+1)}</div>
-        <div class="step-label">${sg.label}</div>
-        <div class="step-name" title="${sg.name}">${sg.name || '—'}</div>
-      </div>
-    `).join('');
+    const stepsHtml = signers.map((s, i) => `
+      <div class="step ${s.st}">
+        <div class="step-icon">${s.st === 'done' ? '&#10003;' : (i + 1)}</div>
+        <div class="step-label">${s.label}</div>
+        <div class="step-name" title="${s.name}">${s.name || '—'}</div>
+      </div>`).join('');
 
-    const datesHTML = signerDefs.map(sg => `
-      <div class="signed-cell ${sg.status === 'done' ? 'done' : ''}">
-        <span>${sg.role}</span>
-        ${sg.status === 'done' && sg.date ? sg.date : '—'}
-      </div>
-    `).join('');
+    const datesHtml = signers.map(s => `
+      <div class="date-cell ${s.st === 'done' ? 'done' : ''}">
+        <span>${s.role}</span>
+        ${s.st === 'done' && s.date ? s.date : '—'}
+      </div>`).join('');
 
     return `
       <div class="card">
@@ -470,15 +285,13 @@ function renderContracts(contracts) {
           <div class="clinic-name">${c.clinicName || c.emailSubject || '—'}</div>
           ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
         </div>
-        <div class="progress-wrap">
-          <div class="track">${stepsHTML}</div>
+        <div class="progress-wrap"><div class="track">${stepsHtml}</div></div>
+        <div class="dates">${datesHtml}</div>
+        <div class="overall ${allDone ? 'all-done' : 'in-progress'}">
+          ${allDone ? '&#10003; 三方簽署完成' : `&#8999; 進行中 ${doneCount}/3 已簽署`}
         </div>
-        <div class="signed-row">${datesHTML}</div>
-        ${overallHTML}
-      </div>
-    `;
+      </div>`;
   }).join('');
-
   output.innerHTML = `<div class="results">${html}</div>`;
 }
 </script>
