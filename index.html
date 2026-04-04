@@ -306,8 +306,14 @@ function renderContracts(contracts) {
   output.innerHTML = `<div class="results">${html}</div>`;
 }
 
-// 有記住的查詢就自動執行
-if (saved && saved.includes('||')) doSearch();
+//只帶入欄位，不自動查詢
+  const saved = localStorage.getItem('last_query');
+if (saved && saved.includes('||')) {
+  const [am, clinic] = saved.split('||');
+  inputAM.value     = am;
+  inputClinic.value = clinic === 'all' ? 'all' : clinic;
+}
+
 </script>
 </body>
 </html>
