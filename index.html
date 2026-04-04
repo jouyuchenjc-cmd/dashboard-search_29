@@ -34,7 +34,6 @@
   .header { max-width: 720px; margin: 0 auto 28px; }
   .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
   .header p  { font-size: 13px; color: var(--color-text-s); }
-
   .search-wrap { max-width: 720px; margin: 0 auto 20px; display: flex; gap: 8px; }
   .search-wrap input {
     flex: 1; height: 44px; padding: 0 14px;
@@ -54,7 +53,6 @@
   }
   .btn:hover    { background: var(--color-primary-d); }
   .btn:disabled { background: var(--color-primary-sub); cursor: not-allowed; }
-
   .status-bar {
     max-width: 720px; margin: 0 auto 14px;
     font-size: 12px; color: var(--color-text-s);
@@ -63,7 +61,6 @@
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-d); flex-shrink: 0; }
   .dot.live { background: var(--color-success); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-
   .message {
     max-width: 720px; margin: 0 auto;
     padding: 20px; border-radius: 8px;
@@ -72,7 +69,6 @@
   .message.error   { background: #E9D7D5; color: #D28187; }
   .message.empty   { background: var(--color-surface); color: var(--color-text-s); }
   .message.loading { background: var(--color-surface); color: var(--color-text-s); }
-
   .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
   .card-head {
@@ -84,8 +80,7 @@
   .renewal-badge {
     flex-shrink: 0;
     background: var(--color-primary-sub); color: var(--color-primary-d);
-    font-size: 11px; font-weight: 600;
-    padding: 3px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
   }
   .progress-wrap { padding: 18px 18px 6px; }
   .track { display: flex; align-items: flex-start; }
@@ -147,15 +142,14 @@
 <div id="output"></div>
 
 <script>
-// ── 貼上你的 Apps Script Web App URL ──
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/alleypin.com/s/AKfycbzblJAFj7TqcTrWHXO134TzOWQ7QRldNAB9wr-nRRlEJxxLWvuJUi78Q30OklSPAoCI/exec';
-// ──────────────────────────────────────
+// ── 設定這兩個值 ──────────────────────────────────────────
+const N8N_WEBHOOK_URL = 'https://alleypin.app.n8n.cloud/webhook/contract-dashboard';
+// ─────────────────────────────────────────────────────────
 
 let currentQuery   = '';
 let refreshTimer   = null;
 let countdownTimer = null;
 let secondsLeft    = 60;
-let cbCounter      = 0;
 
 const input      = document.getElementById('searchInput');
 const btn        = document.getElementById('searchBtn');
@@ -163,19 +157,25 @@ const output     = document.getElementById('output');
 const statusText = document.getElementById('statusText');
 const dot        = document.getElementById('dot');
 
+// 記住上次查詢
+const saved = localStorage.getItem('last_query');
+if (saved) {
+  input.value = saved;
+}
+
 input.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
 function doSearch() {
   const q = input.value.trim();
   if (!q) return;
   currentQuery = q;
+  localStorage.setItem('last_query', q);
   clearTimeout(refreshTimer);
   clearInterval(countdownTimer);
   fetchData(true);
 }
 
-// JSONP fetch — 繞過 CORS 限制
-function fetchData(isManual = false) {
+async function fetchData(isManual = false) {
   if (!currentQuery) return;
   if (isManual) {
     btn.disabled = true;
@@ -183,26 +183,11 @@ function fetchData(isManual = false) {
     statusText.innerHTML = '查詢中…';
     output.innerHTML = '<div class="message loading">載入中…</div>';
   }
-
-  const cbName = `_cb${cbCounter++}`;
-  const script = document.createElement('script');
-  const timer  = setTimeout(() => {
-    cleanup();
-    dot.className = 'dot';
-    statusText.innerHTML = '連線逾時，請稍後重試';
-    output.innerHTML = '<div class="message error">請求逾時，請稍後再試</div>';
-    btn.disabled = false;
-  }, 10000);
-
-  function cleanup() {
-    clearTimeout(timer);
-    delete window[cbName];
-    if (script.parentNode) script.parentNode.removeChild(script);
-  }
-
-  window[cbName] = function(json) {
-    cleanup();
-    btn.disabled = false;
+  try {
+    const res = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
+      method: 'GET',
+    });
+    const json = await res.json();
     if (json.error) {
       dot.className = 'dot';
       statusText.innerHTML = json.message || '查無資料';
@@ -212,10 +197,12 @@ function fetchData(isManual = false) {
       renderContracts(json.contracts);
       startCountdown();
     }
-  };
-
-  script.src = `${APPS_SCRIPT_URL}?q=${encodeURIComponent(currentQuery)}&callback=${cbName}`;
-  document.head.appendChild(script);
+  } catch (err) {
+    dot.className = 'dot';
+    statusText.innerHTML = '連線失敗，請稍後重試';
+    output.innerHTML = '<div class="message error">無法連線至資料來源</div>';
+  }
+  btn.disabled = false;
 }
 
 function startCountdown() {
@@ -294,6 +281,9 @@ function renderContracts(contracts) {
   }).join('');
   output.innerHTML = `<div class="results">${html}</div>`;
 }
+
+// 有記住的查詢就自動執行
+if (saved) doSearch();
 </script>
 </body>
 </html>
