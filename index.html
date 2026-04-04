@@ -217,12 +217,9 @@ async function fetchData(isManual = false) {
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else if (json.mode === 'stats') {
   dot.className = 'dot live';
-  renderStats(json.stats);
-  startCountdown();
 } else {
   dot.className = 'dot live';
   renderContracts(json.contracts);
-  startCountdown();
 }
   } catch {
     dot.className = 'dot';
@@ -230,19 +227,6 @@ async function fetchData(isManual = false) {
     output.innerHTML = '<div class="message error">無法連線至資料來源</div>';
   }
   btn.disabled = false;
-}
-
-function startCountdown() {
-  clearTimeout(refreshTimer);
-  clearInterval(countdownTimer);
-  secondsLeft = 60;
-  tick();
-  countdownTimer = setInterval(() => {
-    secondsLeft--;
-    tick();
-    if (secondsLeft <= 0) clearInterval(countdownTimer);
-  }, 1000);
-  refreshTimer = setTimeout(() => fetchData(false), 60000);
 }
 
 function tick() {
