@@ -14,9 +14,9 @@
     --color-text:        #2C3A4A;
     --color-text-s:      #5A6A7A;
     --color-text-d:      #9AABB8;
-    --color-primary:     #548EB8;
-    --color-primary-d:   #4C7A91;
-    --color-primary-sub: #BAC2D0;
+    --color-primary:     #B96748;
+    --color-primary-d:   #9A5038;
+    --color-primary-sub: #E8C4B0;
     --color-success:     #4A7A65;
     --color-success-sub: #C5D9D2;
     --color-warning:     #9A7845;
@@ -34,18 +34,22 @@
   .header { max-width: 720px; margin: 0 auto 28px; }
   .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
   .header p  { font-size: 13px; color: var(--color-text-s); }
-  .search-wrap { max-width: 720px; margin: 0 auto 20px; display: flex; gap: 8px; }
+
+  .search-wrap {
+    max-width: 720px; margin: 0 auto 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
   .search-wrap input {
-    flex: 1; height: 44px; padding: 0 14px;
+    flex: 1; min-width: 140px; height: 60px; padding: 0 14px;
     border: 1.5px solid var(--color-surface-low);
     border-radius: 8px; background: var(--color-surface);
     color: var(--color-text); font-size: 14px; font-family: inherit; outline: none;
     transition: border-color .15s;
   }
-  .search-wrap input:focus { border-color: var(--color-primary); }
+  .search-wrap input:focus { border-color: #B96748; }
   .search-wrap input::placeholder { color: var(--color-text-d); }
   .btn {
-    height: 44px; padding: 0 20px;
+    height: 40px; padding: 0 20px;
     background: var(--color-primary); color: #fff;
     border: none; border-radius: 8px;
     font-size: 14px; font-weight: 600; font-family: inherit;
@@ -53,6 +57,7 @@
   }
   .btn:hover    { background: var(--color-primary-d); }
   .btn:disabled { background: var(--color-primary-sub); cursor: not-allowed; }
+
   .status-bar {
     max-width: 720px; margin: 0 auto 14px;
     font-size: 12px; color: var(--color-text-s);
@@ -61,6 +66,7 @@
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-d); flex-shrink: 0; }
   .dot.live { background: var(--color-success); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
   .message {
     max-width: 720px; margin: 0 auto;
     padding: 20px; border-radius: 8px;
@@ -69,6 +75,7 @@
   .message.error   { background: #E9D7D5; color: #D28187; }
   .message.empty   { background: var(--color-surface); color: var(--color-text-s); }
   .message.loading { background: var(--color-surface); color: var(--color-text-s); }
+
   .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
   .card-head {
@@ -124,12 +131,15 @@
 
 <div class="header">
   <h1>系統合約續約 — 簽署進度</h1>
-  <p>輸入 AM Email 或 Clinic Name 查詢對應合約</p>
+  <p>輸入 AM Name 及 Clinic Name 即可查詢，有任何問題請 Slack tag Joy</p>
 </div>
 
 <div class="search-wrap">
-  <input id="searchInput" type="text"
-    placeholder="AM Email 或 Clinic Name"
+  <input id="inputAM" type="text"
+    placeholder="AM Name"
+    autocomplete="off" autocorrect="off" spellcheck="false">
+  <input id="inputClinic" type="text"
+    placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
   <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
 </div>
@@ -142,34 +152,40 @@
 <div id="output"></div>
 
 <script>
-// ── 設定這兩個值 ──────────────────────────────────────────
 const N8N_WEBHOOK_URL = 'https://alleypin.app.n8n.cloud/webhook/contract-dashboard';
-// ─────────────────────────────────────────────────────────
 
 let currentQuery   = '';
 let refreshTimer   = null;
 let countdownTimer = null;
 let secondsLeft    = 60;
 
-const input      = document.getElementById('searchInput');
-const btn        = document.getElementById('searchBtn');
-const output     = document.getElementById('output');
-const statusText = document.getElementById('statusText');
-const dot        = document.getElementById('dot');
+const inputAM     = document.getElementById('inputAM');
+const inputClinic = document.getElementById('inputClinic');
+const btn         = document.getElementById('searchBtn');
+const output      = document.getElementById('output');
+const statusText  = document.getElementById('statusText');
+const dot         = document.getElementById('dot');
 
 // 記住上次查詢
 const saved = localStorage.getItem('last_query');
-if (saved) {
-  input.value = saved;
+if (saved && saved.includes('||')) {
+  const [am, clinic]  = saved.split('||');
+  inputAM.value       = am;
+  inputClinic.value   = clinic;
 }
 
-input.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
+inputClinic.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
 function doSearch() {
-  const q = input.value.trim();
-  if (!q) return;
-  currentQuery = q;
-  localStorage.setItem('last_query', q);
+  const am     = inputAM.value.trim();
+  const clinic = inputClinic.value.trim();
+  if (!am || !clinic) {
+    output.innerHTML = '<div class="message error">請同時輸入 AM Name 及 Clinic Name</div>';
+    return;
+  }
+  currentQuery = `${am}||${clinic}`;
+  localStorage.setItem('last_query', currentQuery);
   clearTimeout(refreshTimer);
   clearInterval(countdownTimer);
   fetchData(true);
@@ -184,7 +200,7 @@ async function fetchData(isManual = false) {
     output.innerHTML = '<div class="message loading">載入中…</div>';
   }
   try {
-    const res = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
+    const res  = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
       method: 'GET',
     });
     const json = await res.json();
@@ -197,7 +213,7 @@ async function fetchData(isManual = false) {
       renderContracts(json.contracts);
       startCountdown();
     }
-  } catch (err) {
+  } catch {
     dot.className = 'dot';
     statusText.innerHTML = '連線失敗，請稍後重試';
     output.innerHTML = '<div class="message error">無法連線至資料來源</div>';
@@ -283,7 +299,7 @@ function renderContracts(contracts) {
 }
 
 // 有記住的查詢就自動執行
-if (saved) doSearch();
+if (saved && saved.includes('||')) doSearch();
 </script>
 </body>
 </html>
