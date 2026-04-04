@@ -40,7 +40,7 @@
     display: flex; flex-direction: column; gap: 16px;
   }
   .search-wrap input {
-    flex: 1; min-width: 140px; width: 100%; padding: 16px 24px;
+    width: 100%; padding: 16px 24px;
     border: 1.5px solid var(--color-surface-low);
     border-radius: 8px; background: var(--color-surface);
     color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
@@ -67,6 +67,11 @@
   .dot.live { background: var(--color-success); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
+  .result-count {
+    max-width: 720px; margin: 0 auto 10px;
+    font-size: 12px; color: var(--color-text-s);
+  }
+
   .message {
     max-width: 720px; margin: 0 auto;
     padding: 20px; border-radius: 8px;
@@ -77,18 +82,36 @@
   .message.loading { background: var(--color-surface); color: var(--color-text-s); }
 
   .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+  /* 正常卡片 */
   .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+
+  /* 作廢卡片 */
+  .card.voided { background: #E8E4DF; opacity: .85; }
+  .card.voided .step-icon,
+  .card.voided .step-label,
+  .card.voided .step-name,
+  .card.voided .date-cell { filter: grayscale(1); opacity: .6; }
+
   .card-head {
     padding: 14px 18px 12px;
     border-bottom: 1px solid var(--color-surface-low);
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
   }
+  .card-head-left { display: flex; flex-direction: column; gap: 3px; }
   .clinic-name { font-size: 15px; font-weight: 600; }
+  .sent-date   { font-size: 11px; color: var(--color-text-s); }
+
+  .card-head-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .renewal-badge {
-    flex-shrink: 0;
     background: var(--color-primary-sub); color: var(--color-primary-d);
     font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
   }
+  .voided-badge {
+    background: #B96748; color: #fff;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
+  }
+
   .progress-wrap { padding: 18px 18px 6px; }
   .track { display: flex; align-items: flex-start; }
   .step  { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -137,7 +160,7 @@
 <div class="search-wrap">
   <input id="inputAM" type="text"
     placeholder="AM Name"
-    autocomplete="off" autocorrect="off" spellcheck="false">
+    autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
   <input id="inputClinic" type="text"
     placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
@@ -149,6 +172,7 @@
   <span id="statusText">尚未查詢</span>
 </div>
 
+<div id="resultCount"></div>
 <div id="output"></div>
 
 <script>
@@ -160,15 +184,16 @@ const inputAM     = document.getElementById('inputAM');
 const inputClinic = document.getElementById('inputClinic');
 const btn         = document.getElementById('searchBtn');
 const output      = document.getElementById('output');
+const resultCount = document.getElementById('resultCount');
 const statusText  = document.getElementById('statusText');
 const dot         = document.getElementById('dot');
 
-// 記住上次查詢
+// 只帶入欄位，不自動查詢
 const saved = localStorage.getItem('last_query');
 if (saved && saved.includes('||')) {
   const [am, clinic] = saved.split('||');
   inputAM.value     = am;
-  inputClinic.value = clinic === 'all' ? 'all' : clinic;
+  inputClinic.value = clinic;
 }
 
 inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
@@ -188,9 +213,15 @@ function doSearch() {
 
 async function fetchData() {
   btn.disabled = true;
+  btn.textContent = '查詢中…';
   dot.className = 'dot';
   statusText.innerHTML = '查詢中…';
+  resultCount.innerHTML = '';
   output.innerHTML = '<div class="message loading">載入中…</div>';
+
+  // 收起手機鍵盤
+  inputAM.blur();
+  inputClinic.blur();
 
   try {
     const res  = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
@@ -201,22 +232,30 @@ async function fetchData() {
     if (json.error) {
       dot.className = 'dot';
       statusText.innerHTML = json.message || '查無資料';
+      resultCount.innerHTML = '';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else if (json.mode === 'stats') {
       dot.className = 'dot live';
+      resultCount.innerHTML = '';
       renderStats(json.stats);
       tick();
     } else {
       dot.className = 'dot live';
+      if (json.contracts && json.contracts.length > 0) {
+        resultCount.innerHTML = `<div class="result-count">共 ${json.contracts.length} 份合約</div>`;
+      }
       renderContracts(json.contracts);
       tick();
     }
   } catch {
     dot.className = 'dot';
     statusText.innerHTML = '連線失敗，請稍後重試';
+    resultCount.innerHTML = '';
     output.innerHTML = '<div class="message error">無法連線至資料來源</div>';
   }
+
   btn.disabled = false;
+  btn.textContent = '查詢';
 }
 
 function tick() {
@@ -244,7 +283,7 @@ function renderStats(s) {
   output.innerHTML = `
     <div class="results">
       <div class="card">
-        <div class="card-head"><div class="clinic-name">合約統計</div></div>
+        <div class="card-head"><div class="card-head-left"><div class="clinic-name">合約統計</div></div></div>
         <div style="padding:20px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
           <div>
             <div style="font-size:28px;font-weight:600;color:#548EB8">${s.sent}</div>
@@ -269,6 +308,7 @@ function renderContracts(contracts) {
     return;
   }
   const html = contracts.map(c => {
+    const isVoided  = (c.envelopeStatus || '').toLowerCase() === 'voided';
     const signers = [
       { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
       { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
@@ -290,30 +330,30 @@ function renderContracts(contracts) {
         ${s.st === 'done' && s.date ? s.date : '—'}
       </div>`).join('');
 
+    const overallHtml = isVoided ? '' : `
+      <div class="overall ${allDone ? 'all-done' : 'in-progress'}">
+        ${allDone ? '&#10003; 三方簽署完成' : `&#8999; 進行中 ${doneCount}/3 已簽署`}
+      </div>`;
+
     return `
-      <div class="card">
+      <div class="card ${isVoided ? 'voided' : ''}">
         <div class="card-head">
-          <div class="clinic-name">${c.clinicName || c.emailSubject || '—'}</div>
-          ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
+          <div class="card-head-left">
+            <div class="clinic-name">${c.clinicName || c.emailSubject || '—'}</div>
+            ${c.generatedDateTime ? `<div class="sent-date">送出 ${c.generatedDateTime}</div>` : ''}
+          </div>
+          <div class="card-head-right">
+            ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
+            ${isVoided ? `<div class="voided-badge">已作廢</div>` : ''}
+          </div>
         </div>
         <div class="progress-wrap"><div class="track">${stepsHtml}</div></div>
         <div class="dates">${datesHtml}</div>
-        <div class="overall ${allDone ? 'all-done' : 'in-progress'}">
-          ${allDone ? '&#10003; 三方簽署完成' : `&#8999; 進行中 ${doneCount}/3 已簽署`}
-        </div>
+        ${overallHtml}
       </div>`;
   }).join('');
   output.innerHTML = `<div class="results">${html}</div>`;
 }
-
-//只帶入欄位，不自動查詢
-  const saved = localStorage.getItem('last_query');
-if (saved && saved.includes('||')) {
-  const [am, clinic] = saved.split('||');
-  inputAM.value     = am;
-  inputClinic.value = clinic === 'all' ? 'all' : clinic;
-}
-
 </script>
 </body>
 </html>
