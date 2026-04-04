@@ -215,12 +215,15 @@ async function fetchData(isManual = false) {
       dot.className = 'dot';
       statusText.innerHTML = json.message || '查無資料';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
-    } else {
-     dot.className = 'dot live';
-renderContracts(json.contracts);
-tick();
-
-    }
+    } else if (json.mode === 'stats') {
+  dot.className = 'dot live';
+  renderStats(json.stats);
+  startCountdown();
+} else {
+  dot.className = 'dot live';
+  renderContracts(json.contracts);
+  startCountdown();
+}
   } catch {
     dot.className = 'dot';
     statusText.innerHTML = '連線失敗，請稍後重試';
@@ -263,7 +266,29 @@ function signerLabel(s) {
   if (l === 'delivered') return '已送達';
   return s;
 }
-
+function renderStats(s) {
+  output.innerHTML = `
+    <div class="results">
+      <div class="card">
+        <div class="card-head"><div class="clinic-name">合約統計</div></div>
+        <div style="padding:20px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+          <div>
+            <div style="font-size:28px;font-weight:600;color:#548EB8">${s.sent}</div>
+            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">已送出</div>
+          </div>
+          <div>
+            <div style="font-size:28px;font-weight:600;color:#4A7A65">${s.completed}</div>
+            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">已完成</div>
+          </div>
+          <div>
+            <div style="font-size:28px;font-weight:600;color:#D28187">${s.voided}</div>
+            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">作廢</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+  
 function renderContracts(contracts) {
   if (!contracts || contracts.length === 0) {
     output.innerHTML = '<div class="message empty">找不到合約紀錄</div>';
