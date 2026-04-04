@@ -141,6 +141,9 @@
   <input id="inputClinic" type="text"
     placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--color-text-s); cursor:pointer; padding: 4px 0;">
+    <input type="checkbox" id="inputAll"> 顯示過去 2 週所有合約
+  </label>
   <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
 </div>
 
@@ -169,10 +172,15 @@ const dot         = document.getElementById('dot');
 // 記住上次查詢
 const saved = localStorage.getItem('last_query');
 if (saved && saved.includes('||')) {
-  const [am, clinic]  = saved.split('||');
-  inputAM.value       = am;
-  inputClinic.value   = clinic;
+  const [am, clinic] = saved.split('||');
+  inputAM.value = am;
+  if (clinic.toUpperCase() === '__ALL__') {
+    document.getElementById('inputAll').checked = true;
+  } else {
+    inputClinic.value = clinic;
+  }
 }
+
 
 inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
 inputClinic.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
