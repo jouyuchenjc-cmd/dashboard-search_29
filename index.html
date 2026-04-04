@@ -192,7 +192,8 @@ function doSearch() {
     output.innerHTML = '<div class="message error">請同時輸入 AM Name 及 Clinic Name</div>';
     return;
   }
-  currentQuery = `${am}||${clinic}`;
+  const isAll  = clinic.toLowerCase() === 'all';
+currentQuery = isAll ? `${am}||all` : `${am}||${clinic}`;
   localStorage.setItem('last_query', currentQuery);
   clearTimeout(refreshTimer);
   clearInterval(countdownTimer);
