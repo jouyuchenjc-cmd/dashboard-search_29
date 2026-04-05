@@ -39,13 +39,13 @@
     max-width: 720px; margin: 0 auto 20px;
     display: flex; flex-direction: column; gap: 16px;
   }
-  .search-wrap input {
-    width: 100%; padding: 16px 24px;
-    border: 1.5px solid var(--color-surface-low);
-    border-radius: 8px; background: var(--color-surface);
-    color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
-    transition: border-color .15s;
-  }
+  #inputClinic {
+  width: 100%; padding: 16px 24px;
+  border: 1.5px solid var(--color-surface-low);
+  border-radius: 8px; background: var(--color-surface);
+  color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
+  transition: border-color .15s;
+}
   .search-wrap input:focus { border-color: #B96748; }
   .search-wrap input::placeholder { color: var(--color-text-d); }
   .btn {
@@ -158,9 +158,16 @@
 </div>
 
 <div class="search-wrap">
-  <input id="inputAM" type="text"
-    placeholder="AM Name"
-    autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+ <div style="position:relative;">
+  <input id="inputAM" type="password"
+    placeholder="AM"
+    autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+    style="width:100%;padding:16px 52px 16px 24px;border:1.5px solid var(--color-surface-low);border-radius:8px;background:var(--color-surface);color:var(--color-text);font-size:16px;font-family:inherit;outline:none;">
+  <button type="button" onclick="toggleAM()" id="amEye"
+    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--color-text-d);font-size:16px;padding:4px;">
+    &#128065;
+  </button>
+</div>
   <input id="inputClinic" type="text"
     placeholder="Clinic Name"
     autocomplete="off" autocorrect="off" spellcheck="false">
@@ -177,7 +184,6 @@
 
 <script>
 const N8N_WEBHOOK_URL = 'https://alleypin.app.n8n.cloud/webhook/contract-dashboard';
-
 let currentQuery = '';
 
 const inputAM     = document.getElementById('inputAM');
@@ -195,6 +201,19 @@ if (saved && saved.includes('||')) {
   inputAM.value     = am;
   inputClinic.value = clinic;
 }
+
+function toggleAM() {
+  const input = document.getElementById('inputAM');
+  const eye   = document.getElementById('amEye');
+  if (input.type === 'password') {
+    input.type = 'text';
+    eye.style.opacity = '1';
+  } else {
+    input.type = 'password';
+    eye.style.opacity = '0.4';
+  }
+}
+
 
 inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
 inputClinic.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
