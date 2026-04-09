@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>系統合約續約 — 簽署進度查詢</title>
+<title>合約狀態查詢</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -14,14 +14,19 @@
     --color-text:        #2C3A4A;
     --color-text-s:      #5A6A7A;
     --color-text-d:      #9AABB8;
-    --color-primary:     #B96748;
-    --color-primary-d:   #9A5038;
-    --color-primary-sub: #E8C4B0;
+    --color-primary:     #548EB8;
+    --color-primary-l:   #97AFCA;
+    --color-primary-d:   #4C7A91;
+    --color-primary-sub: #BAC2D0;
+    --color-cta:         #C66240;
+    --color-cta-d:       #A84F30;
+    --color-cta-sub:     #F0D4C6;
     --color-success:     #4A7A65;
     --color-success-sub: #C5D9D2;
     --color-warning:     #9A7845;
     --color-warning-sub: #E5D8BE;
-    --shadow: 0 4px 8px rgba(44,58,74,.12), 0 2px 4px rgba(44,58,74,.08);
+    --shadow-1: 0 1px 3px rgba(44,58,74,.12), 0 1px 2px rgba(44,58,74,.08);
+    --shadow-2: 0 4px 8px rgba(44,58,74,.12), 0 2px 4px rgba(44,58,74,.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -29,34 +34,118 @@
     color: var(--color-text);
     font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
     min-height: 100vh;
-    padding: 32px 16px 64px;
   }
+
+  /* ═══════════════════════════════
+     REGION SELECT SCREEN
+  ═══════════════════════════════ */
+  #regionScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+  .region-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .region-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-text);
+  }
+  .region-header p {
+    font-size: 13px;
+    color: var(--color-text-s);
+  }
+
+  .region-cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 520px;
+  }
+  .region-card {
+    flex: 1;
+    min-width: 200px;
+    max-width: 240px;
+    background: var(--color-surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-2);
+    padding: 32px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .region-card:hover {
+    box-shadow: 0 8px 16px rgba(44,58,74,.12), 0 4px 8px rgba(44,58,74,.08);
+    transform: translateY(-2px);
+  }
+  .region-card:active { transform: translateY(0); }
+  .region-card.tw .region-label { color: var(--color-primary-d); }
+  .region-card.jp .region-label { color: #5E5070; }
+  .region-card.tw { border-color: var(--color-primary); }
+  .region-card.jp { border-color: #867993; }
+
+  .region-label { font-size: 28px; font-weight: 700; color: var(--color-text); letter-spacing: .04em; }
+  .region-sub   { font-size: 12px; color: var(--color-text-s); text-align: center; line-height: 1.5; }
+
+  /* ═══════════════════════════════
+     SEARCH SCREEN
+  ═══════════════════════════════ */
+  #searchScreen { display: none; padding: 32px 16px 64px; }
+
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: none; font-family: inherit;
+    font-size: 13px; color: var(--color-text-s);
+    cursor: pointer; padding: 0; margin-bottom: 24px;
+    transition: color .15s;
+  }
+  .back-btn:hover { color: var(--color-text); }
+
+  .region-indicator {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 12px 3px 8px; border-radius: 9999px;
+    font-size: 12px; font-weight: 600; margin-bottom: 6px;
+  }
+  .region-indicator.tw { background: var(--color-primary-sub); color: var(--color-primary-d); }
+  .region-indicator.jp { background: #E8E4EE; color: #5E5070; }
+
   .header { max-width: 720px; margin: 0 auto 28px; }
   .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-  .header p  { font-size: 13px; color: var(--color-text-s); }
+  .header p  { font-size: 13px; color: var(--color-text-s); line-height: 1.7; }
 
-  .search-wrap {
-    max-width: 720px; margin: 0 auto 20px;
-    display: flex; flex-direction: column; gap: 16px;
-  }
+  .search-wrap { max-width: 720px; margin: 0 auto 20px; display: flex; flex-direction: column; gap: 16px; }
   #inputClinic {
     width: 100%; padding: 16px 24px;
-    border: 1.5px solid var(--color-surface-low);
-    border-radius: 8px; background: var(--color-surface);
-    color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
-    transition: border-color .15s;
+    border: 1.5px solid var(--color-surface-low); border-radius: 8px;
+    background: var(--color-surface); color: var(--color-text);
+    font-size: 16px; font-family: inherit; outline: none; transition: border-color .15s;
   }
-  .search-wrap input:focus { border-color: #B96748; }
+  .search-wrap input:focus { border-color: var(--color-primary); }
   .search-wrap input::placeholder { color: var(--color-text-d); }
+
   .btn {
     height: 52px; padding: 0 20px;
-    background: var(--color-primary); color: #fff;
+    background: var(--color-cta); color: #fff;
     border: none; border-radius: 8px;
     font-size: 14px; font-weight: 600; font-family: inherit;
     cursor: pointer; transition: background .15s; white-space: nowrap;
   }
-  .btn:hover    { background: var(--color-primary-d); }
-  .btn:disabled { background: var(--color-primary-sub); cursor: not-allowed; }
+  .btn:hover    { background: var(--color-cta-d); }
+  .btn:disabled { background: var(--color-cta-sub); cursor: not-allowed; }
 
   .status-bar {
     max-width: 720px; margin: 0 auto 14px;
@@ -67,31 +156,16 @@
   .dot.live { background: var(--color-success); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-  .result-count {
-    max-width: 720px; margin: 0 auto 10px;
-    font-size: 12px; color: var(--color-text-s);
-  }
-
-  .message {
-    max-width: 720px; margin: 0 auto;
-    padding: 20px; border-radius: 8px;
-    font-size: 14px; text-align: center;
-  }
+  .result-count { max-width: 720px; margin: 0 auto 10px; font-size: 12px; color: var(--color-text-s); }
+  .message { max-width: 720px; margin: 0 auto; padding: 20px; border-radius: 8px; font-size: 14px; text-align: center; }
   .message.error   { background: #E9D7D5; color: #D28187; }
   .message.empty   { background: var(--color-surface); color: var(--color-text-s); }
   .message.loading { background: var(--color-surface); color: var(--color-text-s); }
 
   .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
 
-  /* 正常卡片 */
-  .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
-
-  /* ── 作廢卡片：整體灰化 ── */
-  .card.voided {
-    background: #DEDAD4;
-    opacity: .75;
-    filter: grayscale(0.4);
-  }
+  .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow-2); overflow: hidden; }
+  .card.voided { background: #DEDAD4; opacity: .75; filter: grayscale(0.4); }
   .card.voided .clinic-name,
   .card.voided .sent-date,
   .card.voided .step-name { color: #8A9AA8; }
@@ -101,10 +175,7 @@
   .card.voided .date-cell.done { color: #9AABB8; }
   .card.voided .progress-wrap,
   .card.voided .dates { opacity: .6; }
-  .card.voided .card-head {
-    border-bottom-color: #C8C2BA;
-  }
-  /* envelope-id tag in voided 也灰掉 */
+  .card.voided .card-head { border-bottom-color: #C8C2BA; }
   .card.voided .envelope-id-tag { opacity: .5; }
 
   .card-head {
@@ -116,27 +187,15 @@
   .clinic-name { font-size: 15px; font-weight: 600; }
   .sent-date   { font-size: 11px; color: var(--color-text-s); }
 
-  /* ── Envelope ID tag ── */
   .envelope-id-tag {
-    font-size: 10px; font-weight: 500;
-    color: var(--color-text-d);
-    background: var(--color-surface-low);
-    padding: 2px 8px; border-radius: 9999px;
-    letter-spacing: .02em;
-    white-space: nowrap;
-    max-width: 180px;
+    font-size: 10px; font-weight: 500; color: var(--color-text-d);
+    background: var(--color-surface-low); padding: 2px 8px; border-radius: 9999px;
+    letter-spacing: .02em; white-space: nowrap; max-width: 140px;
     overflow: hidden; text-overflow: ellipsis;
   }
-
   .card-head-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
-  .renewal-badge {
-    background: var(--color-primary-sub); color: var(--color-primary-d);
-    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
-  }
-  .voided-badge {
-    background: #8A9AA8; color: #fff;
-    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
-  }
+  .renewal-badge { background: var(--color-cta-sub); color: var(--color-cta-d); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px; }
+  .voided-badge  { background: #8A9AA8; color: #fff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px; }
 
   .progress-wrap { padding: 18px 18px 6px; }
   .track { display: flex; align-items: flex-start; }
@@ -153,72 +212,93 @@
     border: 2px solid var(--color-surface-low);
     background: var(--color-surface); color: var(--color-text-d);
   }
-  .step.done    .step-icon { background: var(--color-success);     border-color: var(--color-success); color: #fff; }
+  .step.done    .step-icon { background: var(--color-success); border-color: var(--color-success); color: #fff; }
   .step.pending .step-icon { background: var(--color-warning-sub); border-color: var(--color-warning); color: var(--color-warning); }
   .step-label { margin-top: 7px; font-size: 10px; font-weight: 500; color: var(--color-text-s); text-align: center; }
   .step.done    .step-label { color: var(--color-success); }
   .step.pending .step-label { color: var(--color-warning); }
-  .step-name {
-    margin-top: 2px; font-size: 11px; font-weight: 600; color: var(--color-text);
-    text-align: center; max-width: 84px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
+  .step-name { margin-top: 2px; font-size: 11px; font-weight: 600; color: var(--color-text); text-align: center; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dates { padding: 4px 18px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
   .date-cell { font-size: 10px; color: var(--color-text-d); text-align: center; line-height: 1.5; }
   .date-cell.done { color: var(--color-text-s); }
   .date-cell span { display: block; font-size: 9px; color: var(--color-text-d); margin-bottom: 1px; text-transform: uppercase; letter-spacing: .04em; }
-  .overall {
-    margin: 0 18px 14px; padding: 7px 12px;
-    border-radius: 8px; font-size: 12px; font-weight: 500;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .overall { margin: 0 18px 14px; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
   .all-done    { background: var(--color-success-sub); color: var(--color-success); }
   .in-progress { background: var(--color-warning-sub); color: var(--color-warning); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>系統合約續約 — 簽署進度</h1>
-  <p>輸入負責 AM 及 診所名稱 即可查詢，有任何問題請 Slack 群組 tag Joy<br>若需更新後結果，請重新按查詢按鈕<br>＊想一次查自己負責的多筆，請診所名稱輸入 all 會提供過去兩週的合約資料，感謝各位<br>如果 Pipedrive 觸發，但沒查到，那就是 AM 自己還沒簽，還沒確認合約喔！</p>
+<!-- ═══════════ REGION SELECT ═══════════ -->
+<div id="regionScreen">
+  <div class="region-header">
+    <h1>合約狀態查詢</h1>
+    <p>請選擇要查 TW or JP</p>
+  </div>
+  <div class="region-cards">
+    <div class="region-card tw" onclick="selectRegion('TW')">
+      <div class="region-label">TW</div>
+      <div class="region-sub">Taiwan<br>合約狀態查詢</div>
+    </div>
+    <div class="region-card jp" onclick="selectRegion('JP')">
+      <div class="region-label">JP</div>
+      <div class="region-sub">Japan<br>契約状態照会</div>
+    </div>
+  </div>
 </div>
 
-<div class="search-wrap">
- <div style="position:relative;">
-  <input id="inputAM" type="password"
-    placeholder="AM"
-    autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
-    style="width:100%;padding:16px 52px 16px 24px;border:1.5px solid var(--color-surface-low);border-radius:8px;background:var(--color-surface);color:var(--color-text);font-size:16px;font-family:inherit;outline:none;">
- <button type="button" onclick="toggleAM()" id="amEye"
-    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;opacity:0.4;display:flex;align-items:center;">
-  <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6A7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-  <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6A7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-</button>
-</div>
-  <input id="inputClinic" type="text"
-    placeholder="Clinic Name"
-    autocomplete="off" autocorrect="off" spellcheck="false">
-  <button class="btn" id="searchBtn" onclick="doSearch()">查詢</button>
-</div>
+<!-- ═══════════ SEARCH SCREEN ═══════════ -->
+<div id="searchScreen">
+  <div style="max-width:720px;margin:0 auto;">
+    <button class="back-btn" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  </div>
 
-<div class="status-bar">
-  <span class="dot" id="dot"></span>
-  <span id="statusText">尚未查詢</span>
-</div>
+  <div class="header">
+    <div id="regionIndicator" class="region-indicator tw">TW</div>
+    <h1>合約狀態查詢</h1>
+    <p id="headerDesc"></p>
+  </div>
 
-<div id="resultCount"></div>
-<div id="output"></div>
+  <div class="search-wrap">
+    <div style="position:relative;">
+      <input id="inputAM" type="password" placeholder="AM"
+        autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+        style="width:100%;padding:16px 52px 16px 24px;border:1.5px solid var(--color-surface-low);border-radius:8px;background:var(--color-surface);color:var(--color-text);font-size:16px;font-family:inherit;outline:none;">
+      <button type="button" onclick="toggleAM()" id="amEye"
+        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;opacity:0.4;display:flex;align-items:center;">
+        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6A7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6A7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      </button>
+    </div>
+    <input id="inputClinic" type="text" placeholder="Clinic Name"
+      autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn" id="searchBtn" onclick="doSearch()">查詢 Search</button>
+  </div>
+
+  <div class="status-bar">
+    <span class="dot" id="dot"></span>
+    <span id="statusText">尚未查詢</span>
+  </div>
+  <div id="resultCount"></div>
+  <div id="output"></div>
+</div>
 
 <script>
 const N8N_WEBHOOK_URL = 'https://alleypin.app.n8n.cloud/webhook/contract-dashboard';
-let currentQuery = '';
+let currentQuery  = '';
+let currentRegion = 'TW';
 
 const inputAM     = document.getElementById('inputAM');
 const inputClinic = document.getElementById('inputClinic');
@@ -228,11 +308,51 @@ const resultCount = document.getElementById('resultCount');
 const statusText  = document.getElementById('statusText');
 const dot         = document.getElementById('dot');
 
-const saved = localStorage.getItem('last_query');
-if (saved && saved.includes('||')) {
-  const [am, clinic] = saved.split('||');
-  inputAM.value     = am;
-  inputClinic.value = clinic;
+const DESC = {
+  TW: '輸入負責 AM 及診所名稱即可查詢，有任何問題請 Slack 群組 tag Joy<br>若需更新後結果，請重新按查詢按鈕<br>＊輸入診所名稱 all 可查詢過去兩週所有合約',
+  JP: 'AM 名前とクリニック名を入力して照会できます。ご不明な点は Slack グループで Joy にタグ付けしてください<br>最新の結果が必要な場合は、照会ボタンを再度押してください<br>＊クリニック名に all を入力すると過去2週間のデータが表示されます',
+};
+
+function selectRegion(region) {
+  currentRegion = region;
+  const ind = document.getElementById('regionIndicator');
+
+  if (region === 'TW') {
+    ind.className   = 'region-indicator tw';
+    ind.textContent = 'TW';
+    inputClinic.placeholder = 'Clinic Name';
+    inputAM.placeholder     = 'AM';
+  } else {
+    ind.className   = 'region-indicator jp';
+    ind.textContent = 'JP';
+    inputClinic.placeholder = 'クリニック名 / Clinic Name';
+    inputAM.placeholder     = 'BD';
+  }
+  document.getElementById('headerDesc').innerHTML = DESC[region];
+
+  // 還原該 region 上次輸入（不自動查詢）
+  const saved = localStorage.getItem(`last_query_${region}`);
+  if (saved && saved.includes('||')) {
+    const [am, clinic] = saved.split('||');
+    inputAM.value     = am;
+    inputClinic.value = clinic;
+  } else {
+    inputAM.value     = '';
+    inputClinic.value = '';
+  }
+
+  output.innerHTML      = '';
+  resultCount.innerHTML = '';
+  statusText.innerHTML  = '尚未查詢';
+  dot.className         = 'dot';
+
+  document.getElementById('regionScreen').style.display = 'none';
+  document.getElementById('searchScreen').style.display = 'block';
+}
+
+function goBack() {
+  document.getElementById('searchScreen').style.display = 'none';
+  document.getElementById('regionScreen').style.display = 'flex';
 }
 
 function toggleAM() {
@@ -241,13 +361,13 @@ function toggleAM() {
   const eyeIcon    = document.getElementById('eyeIcon');
   const eyeOffIcon = document.getElementById('eyeOffIcon');
   if (input.type === 'password') {
-    input.type              = 'text';
-    eye.style.opacity       = '1';
+    input.type               = 'text';
+    eye.style.opacity        = '1';
     eyeIcon.style.display    = 'none';
     eyeOffIcon.style.display = 'block';
   } else {
-    input.type              = 'password';
-    eye.style.opacity       = '0.4';
+    input.type               = 'password';
+    eye.style.opacity        = '0.4';
     eyeIcon.style.display    = 'block';
     eyeOffIcon.style.display = 'none';
   }
@@ -264,34 +384,32 @@ function doSearch() {
     return;
   }
   currentQuery = `${am}||${clinic.toLowerCase() === 'all' ? 'all' : clinic}`;
-  localStorage.setItem('last_query', currentQuery);
+  localStorage.setItem(`last_query_${currentRegion}`, currentQuery);
   fetchData();
 }
 
 async function fetchData() {
-  btn.disabled = true;
-  btn.textContent = '查詢中…';
-  dot.className = 'dot';
-  statusText.innerHTML = '查詢中…';
+  btn.disabled          = true;
+  btn.textContent       = '查詢中…';
+  dot.className         = 'dot';
+  statusText.innerHTML  = '查詢中…';
   resultCount.innerHTML = '';
-  output.innerHTML = '<div class="message loading">載入中…</div>';
-
+  output.innerHTML      = '<div class="message loading">載入中…</div>';
   inputAM.blur();
   inputClinic.blur();
 
   try {
-    const res  = await fetch(`${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}`, {
-      method: 'GET',
-    });
+    const url  = `${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}&region=${currentRegion}`;
+    const res  = await fetch(url, { method: 'GET' });
     const json = await res.json();
 
     if (json.error) {
-      dot.className = 'dot';
-      statusText.innerHTML = json.message || '查無資料';
+      dot.className         = 'dot';
+      statusText.innerHTML  = json.message || '查無資料';
       resultCount.innerHTML = '';
       output.innerHTML = `<div class="message ${json.error === 'not_found' ? 'empty' : 'error'}">${json.message}</div>`;
     } else if (json.mode === 'stats') {
-      dot.className = 'dot live';
+      dot.className         = 'dot live';
       resultCount.innerHTML = '';
       renderStats(json.stats, json.incomplete);
       tick();
@@ -304,19 +422,18 @@ async function fetchData() {
       tick();
     }
   } catch {
-    dot.className = 'dot';
-    statusText.innerHTML = '連線失敗，請稍後重試';
+    dot.className         = 'dot';
+    statusText.innerHTML  = '連線失敗，請稍後重試';
     resultCount.innerHTML = '';
-    output.innerHTML = '<div class="message error">無法連線至資料來源</div>';
+    output.innerHTML      = '<div class="message error">無法連線至資料來源</div>';
   }
 
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = '查詢';
 }
 
 function tick() {
-  const t = new Date().toLocaleTimeString('zh-TW');
-  statusText.innerHTML = `已載入 ${t}`;
+  statusText.innerHTML = `已載入 ${new Date().toLocaleTimeString('zh-TW')}`;
 }
 
 function signerStatus(s) {
@@ -327,15 +444,19 @@ function signerStatus(s) {
   return 'waiting';
 }
 function signerLabel(s) {
-  if (!s) return '待送出';
+  if (!s) return currentRegion === 'JP' ? '未送信' : '待送出';
   const l = s.toLowerCase();
+  if (currentRegion === 'JP') {
+    if (l === 'completed') return '署名済';
+    if (l === 'sent')      return '署名待ち';
+    if (l === 'delivered') return '送達済';
+    return s;
+  }
   if (l === 'completed') return '已簽署';
   if (l === 'sent')      return '待簽署';
   if (l === 'delivered') return '已送達';
   return s;
 }
-
-/* ── 作廢判斷：接受 voided / 作廢 / void 等寫法 ── */
 function checkVoided(status) {
   if (!status) return false;
   const l = status.toLowerCase().trim();
@@ -346,12 +467,8 @@ function renderStats(s, incomplete) {
   const incompleteHtml = incomplete && incomplete.length > 0 ? `
     <div class="card" style="margin-top:14px;">
       <div class="card-head">
-        <div class="card-head-left">
-          <div class="clinic-name">未完成合約</div>
-        </div>
-        <div class="card-head-right">
-          <div class="renewal-badge">${incomplete.length} 份</div>
-        </div>
+        <div class="card-head-left"><div class="clinic-name">未完成合約</div></div>
+        <div class="card-head-right"><div class="renewal-badge">${incomplete.length} 份</div></div>
       </div>
       ${incomplete.map(c => {
         const signers = [
@@ -390,18 +507,9 @@ function renderStats(s, incomplete) {
       <div class="card">
         <div class="card-head"><div class="card-head-left"><div class="clinic-name">合約統計</div></div></div>
         <div style="padding:20px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
-          <div>
-            <div style="font-size:28px;font-weight:600;color:#548EB8">${s.sent}</div>
-            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">已送出</div>
-          </div>
-          <div>
-            <div style="font-size:28px;font-weight:600;color:#4A7A65">${s.completed}</div>
-            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">已完成</div>
-          </div>
-          <div>
-            <div style="font-size:28px;font-weight:600;color:#D28187">${s.voided}</div>
-            <div style="font-size:11px;color:#5A6A7A;margin-top:4px">作廢</div>
-          </div>
+          <div><div style="font-size:28px;font-weight:600;color:#548EB8">${s.sent}</div><div style="font-size:11px;color:#5A6A7A;margin-top:4px">已送出</div></div>
+          <div><div style="font-size:28px;font-weight:600;color:#4A7A65">${s.completed}</div><div style="font-size:11px;color:#5A6A7A;margin-top:4px">已完成</div></div>
+          <div><div style="font-size:28px;font-weight:600;color:#D28187">${s.voided}</div><div style="font-size:11px;color:#5A6A7A;margin-top:4px">作廢</div></div>
         </div>
       </div>
       ${incompleteHtml}
@@ -415,11 +523,38 @@ function renderContracts(contracts) {
   }
   const html = contracts.map(c => {
     const isVoided  = checkVoided(c.envelopeStatus);
-    const signers = [
-      { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
-      { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
-      { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
-    ];
+    const isJP      = currentRegion === 'JP';
+
+    // JP：計算實際有幾個 signer（name 或 status 有值就算）
+    // 2人 → Ethan / Clinic；3人 → BD / Ethan / Clinic
+    let signers;
+    if (isJP) {
+      const hasS1 = !!(c.signer1Name || c.signer1Status);
+      const hasS2 = !!(c.signer2Name || c.signer2Status);
+      const hasS3 = !!(c.signer3Name || c.signer3Status);
+      const signerCount = [hasS1, hasS2, hasS3].filter(Boolean).length;
+
+      if (signerCount <= 2) {
+        // 2人合約：signer1 = Ethan, signer2 = Clinic
+        signers = [
+          { role: 'Ethan',  name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+          { role: 'Clinic', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+        ];
+      } else {
+        // 3人合約：signer1 = BD, signer2 = Ethan, signer3 = Clinic
+        signers = [
+          { role: 'BD',     name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+          { role: 'Ethan',  name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+          { role: 'Clinic', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
+        ];
+      }
+    } else {
+      signers = [
+        { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+        { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+        { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
+      ];
+    }
     const doneCount = signers.filter(s => s.st === 'done').length;
     const allDone   = doneCount === 3;
 
@@ -430,18 +565,20 @@ function renderContracts(contracts) {
         <div class="step-name" title="${s.name}">${s.name || '—'}</div>
       </div>`).join('');
 
-    const datesHtml = signers.map(s => `
+    const datesHtml = `<div style="padding:4px 18px 16px;display:grid;grid-template-columns:repeat(${signers.length},1fr);gap:4px;">` +
+      signers.map(s => `
       <div class="date-cell ${s.st === 'done' ? 'done' : ''}">
         <span>${s.role}</span>
         ${s.st === 'done' && s.date ? s.date : '—'}
-      </div>`).join('');
+      </div>`).join('') + '</div>';
 
     const overallHtml = isVoided ? '' : `
       <div class="overall ${allDone ? 'all-done' : 'in-progress'}">
-        ${allDone ? '&#10003; 三方簽署完成' : `&#8999; 進行中 ${doneCount}/3 已簽署`}
+        ${allDone
+          ? '&#10003; 全部簽署完成'
+          : `&#8999; 進行中 ${doneCount}/${signers.length} 已簽署`}
       </div>`;
 
-    /* Envelope ID tag — 有值才顯示，取前8碼顯示避免太長 */
     const envId = c.envelopeId || c.envelope_id || c.envelopeID || '';
     const envelopeIdHtml = envId
       ? `<div class="envelope-id-tag" title="${envId}">${envId.substring(0, 8)}…</div>`
@@ -461,7 +598,7 @@ function renderContracts(contracts) {
           </div>
         </div>
         <div class="progress-wrap"><div class="track">${stepsHtml}</div></div>
-        <div class="dates">${datesHtml}</div>
+        ${datesHtml}
         ${overallHtml}
       </div>`;
   }).join('');
