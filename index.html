@@ -40,12 +40,12 @@
     display: flex; flex-direction: column; gap: 16px;
   }
   #inputClinic {
-  width: 100%; padding: 16px 24px;
-  border: 1.5px solid var(--color-surface-low);
-  border-radius: 8px; background: var(--color-surface);
-  color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
-  transition: border-color .15s;
-}
+    width: 100%; padding: 16px 24px;
+    border: 1.5px solid var(--color-surface-low);
+    border-radius: 8px; background: var(--color-surface);
+    color: var(--color-text); font-size: 16px; font-family: inherit; outline: none;
+    transition: border-color .15s;
+  }
   .search-wrap input:focus { border-color: #B96748; }
   .search-wrap input::placeholder { color: var(--color-text-d); }
   .btn {
@@ -86,12 +86,26 @@
   /* 正常卡片 */
   .card { background: var(--color-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
 
-  /* 作廢卡片 */
-  .card.voided { background: #E8E4DF; opacity: .85; }
-  .card.voided .step-icon,
-  .card.voided .step-label,
-  .card.voided .step-name,
-  .card.voided .date-cell { filter: grayscale(1); opacity: .6; }
+  /* ── 作廢卡片：整體灰化 ── */
+  .card.voided {
+    background: #DEDAD4;
+    opacity: .75;
+    filter: grayscale(0.4);
+  }
+  .card.voided .clinic-name,
+  .card.voided .sent-date,
+  .card.voided .step-name { color: #8A9AA8; }
+  .card.voided .step-icon { filter: grayscale(1); opacity: .5; }
+  .card.voided .step-label { color: #9AABB8 !important; }
+  .card.voided .date-cell,
+  .card.voided .date-cell.done { color: #9AABB8; }
+  .card.voided .progress-wrap,
+  .card.voided .dates { opacity: .6; }
+  .card.voided .card-head {
+    border-bottom-color: #C8C2BA;
+  }
+  /* envelope-id tag in voided 也灰掉 */
+  .card.voided .envelope-id-tag { opacity: .5; }
 
   .card-head {
     padding: 14px 18px 12px;
@@ -102,13 +116,25 @@
   .clinic-name { font-size: 15px; font-weight: 600; }
   .sent-date   { font-size: 11px; color: var(--color-text-s); }
 
-  .card-head-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  /* ── Envelope ID tag ── */
+  .envelope-id-tag {
+    font-size: 10px; font-weight: 500;
+    color: var(--color-text-d);
+    background: var(--color-surface-low);
+    padding: 2px 8px; border-radius: 9999px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .card-head-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
   .renewal-badge {
     background: var(--color-primary-sub); color: var(--color-primary-d);
     font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
   }
   .voided-badge {
-    background: #B96748; color: #fff;
+    background: #8A9AA8; color: #fff;
     font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
   }
 
@@ -202,13 +228,13 @@ const resultCount = document.getElementById('resultCount');
 const statusText  = document.getElementById('statusText');
 const dot         = document.getElementById('dot');
 
-// 只帶入欄位，不自動查詢
 const saved = localStorage.getItem('last_query');
 if (saved && saved.includes('||')) {
   const [am, clinic] = saved.split('||');
   inputAM.value     = am;
   inputClinic.value = clinic;
 }
+
 function toggleAM() {
   const input      = document.getElementById('inputAM');
   const eye        = document.getElementById('amEye');
@@ -226,7 +252,6 @@ function toggleAM() {
     eyeOffIcon.style.display = 'none';
   }
 }
-
 
 inputAM.addEventListener('keydown',     e => { if (e.key === 'Enter') doSearch(); });
 inputClinic.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
@@ -251,7 +276,6 @@ async function fetchData() {
   resultCount.innerHTML = '';
   output.innerHTML = '<div class="message loading">載入中…</div>';
 
-  // 收起手機鍵盤
   inputAM.blur();
   inputClinic.blur();
 
@@ -310,6 +334,14 @@ function signerLabel(s) {
   if (l === 'delivered') return '已送達';
   return s;
 }
+
+/* ── 作廢判斷：接受 voided / 作廢 / void 等寫法 ── */
+function checkVoided(status) {
+  if (!status) return false;
+  const l = status.toLowerCase().trim();
+  return l === 'voided' || l === 'void' || l === '作廢';
+}
+
 function renderStats(s, incomplete) {
   const incompleteHtml = incomplete && incomplete.length > 0 ? `
     <div class="card" style="margin-top:14px;">
@@ -327,16 +359,16 @@ function renderStats(s, incomplete) {
           { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
           { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
         ];
-        const stepsHtml = signers.map((s, i) => `
-          <div class="step ${s.st}">
-            <div class="step-icon">${s.st === 'done' ? '&#10003;' : (i + 1)}</div>
-            <div class="step-label">${s.label}</div>
-            <div class="step-name" title="${s.name}">${s.name || '—'}</div>
+        const stepsHtml = signers.map((sg, i) => `
+          <div class="step ${sg.st}">
+            <div class="step-icon">${sg.st === 'done' ? '&#10003;' : (i + 1)}</div>
+            <div class="step-label">${sg.label}</div>
+            <div class="step-name" title="${sg.name}">${sg.name || '—'}</div>
           </div>`).join('');
-        const datesHtml = signers.map(s => `
-          <div class="date-cell ${s.st === 'done' ? 'done' : ''}">
-            <span>${s.role}</span>
-            ${s.st === 'done' && s.date ? s.date : '—'}
+        const datesHtml = signers.map(sg => `
+          <div class="date-cell ${sg.st === 'done' ? 'done' : ''}">
+            <span>${sg.role}</span>
+            ${sg.st === 'done' && sg.date ? sg.date : '—'}
           </div>`).join('');
         return `
           <div style="border-top:1px solid var(--color-surface-low);">
@@ -382,7 +414,7 @@ function renderContracts(contracts) {
     return;
   }
   const html = contracts.map(c => {
-    const isVoided  = (c.envelopeStatus || '').toLowerCase() === 'voided';
+    const isVoided  = checkVoided(c.envelopeStatus);
     const signers = [
       { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
       { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
@@ -409,6 +441,12 @@ function renderContracts(contracts) {
         ${allDone ? '&#10003; 三方簽署完成' : `&#8999; 進行中 ${doneCount}/3 已簽署`}
       </div>`;
 
+    /* Envelope ID tag — 有值才顯示，取前8碼顯示避免太長 */
+    const envId = c.envelopeId || c.envelope_id || c.envelopeID || '';
+    const envelopeIdHtml = envId
+      ? `<div class="envelope-id-tag" title="${envId}">${envId.substring(0, 8)}…</div>`
+      : '';
+
     return `
       <div class="card ${isVoided ? 'voided' : ''}">
         <div class="card-head">
@@ -417,6 +455,7 @@ function renderContracts(contracts) {
             ${c.generatedDateTime ? `<div class="sent-date">送出 ${c.generatedDateTime}</div>` : ''}
           </div>
           <div class="card-head-right">
+            ${envelopeIdHtml}
             ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
             ${isVoided ? `<div class="voided-badge">已作廢</div>` : ''}
           </div>
