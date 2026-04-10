@@ -471,11 +471,27 @@ function renderStats(s, incomplete) {
         <div class="card-head-right"><div class="renewal-badge">${incomplete.length} 份</div></div>
       </div>
       ${incomplete.map(c => {
-        const signers = [
-          { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
-          { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
-          { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
-        ];
+        let signers;
+        if (currentRegion === 'JP') {
+          if ((c.signerCount || 3) <= 2) {
+            signers = [
+              { role: 'Ethan',  name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+              { role: 'Client', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+            ];
+          } else {
+            signers = [
+              { role: 'BD',     name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+              { role: 'Ethan',  name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+              { role: 'Client', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
+            ];
+          }
+        } else {
+          signers = [
+            { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
+            { role: '財務', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+            { role: '客戶', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
+          ];
+        }
         const stepsHtml = signers.map((sg, i) => `
           <div class="step ${sg.st}">
             <div class="step-icon">${sg.st === 'done' ? '&#10003;' : (i + 1)}</div>
@@ -494,7 +510,7 @@ function renderStats(s, incomplete) {
               ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
             </div>
             <div class="progress-wrap"><div class="track">${stepsHtml}</div></div>
-            <div class="dates">${datesHtml}</div>
+            <div style="padding:4px 18px 16px;display:grid;grid-template-columns:repeat(${signers.length},1fr);gap:4px;">${datesHtml}</div>
           </div>`;
       }).join('')}
     </div>` : `
