@@ -541,8 +541,6 @@ function renderContracts(contracts) {
           { role: 'Client', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
         ];
       }
-    }
-
     } else {
       signers = [
         { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
