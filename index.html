@@ -470,7 +470,7 @@ function checkVoided(status) {
 
 function renderStats(s, incomplete) {
   const activeIncomplete = (incomplete || []).filter(c => {
-    if (checkVoided(c)) return false;
+    if (checkVoided(c.envelopeStatus)) return false;
     const signerData = [
       { status: c.signer1Status, name: c.signer1Name },
       { status: c.signer2Status, name: c.signer2Name },
