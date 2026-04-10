@@ -398,9 +398,13 @@ async function fetchData() {
   inputAM.blur();
   inputClinic.blur();
 
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 30000);
+
   try {
     const url  = `${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}&region=${currentRegion}`;
-    const res  = await fetch(url, { method: 'GET' });
+    const res  = await fetch(url, { method: 'GET', signal: controller.signal });
+    clearTimeout(timeoutId);
     const json = await res.json();
 
     if (json.error) {
@@ -421,11 +425,12 @@ async function fetchData() {
       renderContracts(json.contracts);
       tick();
     }
-  } catch {
-    dot.className         = 'dot';ㄇ
-    statusText.innerHTML  = '連線失敗，請稍後重試';
+  } catch(e) {
+    clearTimeout(timeoutId);
+    dot.className         = 'dot';
+    statusText.innerHTML  = e.name === 'AbortError' ? '查詢逾時，請稍後重試' : '連線失敗，請稍後重試';
     resultCount.innerHTML = '';
-    output.innerHTML      = '<div class="message error">無法連線至資料來源</div>';
+    output.innerHTML      = `<div class="message error">${e.name === 'AbortError' ? '查詢逾時（30秒），請稍後重試' : '無法連線至資料來源'}</div>`;
   }
 
   btn.disabled    = false;
