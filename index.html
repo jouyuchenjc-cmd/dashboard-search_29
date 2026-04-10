@@ -403,7 +403,7 @@ async function fetchData() {
 
   try {
     const url  = `${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}&region=${currentRegion}`;
-    const res  = await fetch(url, { method: 'GET', signal: controller.signal });
+    const res  = await fetch(url, { method: 'GET', signal: controller.signal, cache: 'no-store' });
     clearTimeout(timeoutId);
     const json = await res.json();
 
