@@ -422,7 +422,7 @@ async function fetchData() {
       tick();
     }
   } catch {
-    dot.className         = 'dot';
+    dot.className         = 'dot';ㄇ
     statusText.innerHTML  = '連線失敗，請稍後重試';
     resultCount.innerHTML = '';
     output.innerHTML      = '<div class="message error">無法連線至資料來源</div>';
@@ -466,9 +466,13 @@ function checkVoided(status) {
 function renderStats(s, incomplete) {
   const activeIncomplete = (incomplete || []).filter(c => {
     if (checkVoided(c)) return false;
-    const count = c.signerCount || 3;
-    const statuses = [c.signer1Status, c.signer2Status, c.signer3Status].slice(0, count);
-    return !statuses.every(s => (s || '').toLowerCase() === 'completed');
+    const signerData = [
+      { status: c.signer1Status, name: c.signer1Name },
+      { status: c.signer2Status, name: c.signer2Name },
+      { status: c.signer3Status, name: c.signer3Name },
+    ].filter(sg => sg.status || sg.name);
+    if (signerData.length === 0) return true;
+    return !signerData.every(sg => (sg.status || '').toLowerCase() === 'completed');
   });
   incomplete = activeIncomplete;
   const incompleteHtml = incomplete && incomplete.length > 0 ? `
@@ -513,7 +517,10 @@ function renderStats(s, incomplete) {
         return `
           <div style="border-top:1px solid var(--color-surface-low);">
             <div style="padding:12px 18px 0;display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-size:13px;font-weight:600;">${currentRegion === 'JP' ? ([c.contactType, c.orgName].filter(Boolean).join(' - ') || '—') : (c.clinicName || '—')}</div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div style="font-size:13px;font-weight:600;">${currentRegion === 'JP' ? ([c.contactType, c.orgName].filter(Boolean).join(' - ') || '—') : (c.clinicName || '—')}</div>
+                ${c.envelopeId ? `<div class="envelope-id-tag" title="${c.envelopeId}">${c.envelopeId.substring(0,8)}…</div>` : ''}
+              </div>
               ${c.renewalNumber ? `<div class="renewal-badge">${c.renewalNumber}</div>` : ''}
             </div>
             <div class="progress-wrap"><div class="track">${stepsHtml}</div></div>
