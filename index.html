@@ -529,25 +529,20 @@ function renderContracts(contracts) {
     // 2人 → Ethan / Clinic；3人 → BD / Ethan / Clinic
     let signers;
     if (isJP) {
-      const hasS1 = !!(c.signer1Name || c.signer1Status);
-      const hasS2 = !!(c.signer2Name || c.signer2Status);
-      const hasS3 = !!(c.signer3Name || c.signer3Status);
-      const signerCount = [hasS1, hasS2, hasS3].filter(Boolean).length;
-
-      if (signerCount <= 2) {
-        // 2人合約：signer1 = Ethan, signer2 = Clinic
+      if ((c.signerCount || 3) <= 2) {
         signers = [
           { role: 'Ethan',  name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
-          { role: 'Clinic', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
+          { role: 'Client', name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
         ];
       } else {
-        // 3人合約：signer1 = BD, signer2 = Ethan, signer3 = Clinic
         signers = [
           { role: 'BD',     name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
           { role: 'Ethan',  name: c.signer2Name, st: signerStatus(c.signer2Status), label: signerLabel(c.signer2Status), date: c.signer2SignedAt },
-          { role: 'Clinic', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
+          { role: 'Client', name: c.signer3Name, st: signerStatus(c.signer3Status), label: signerLabel(c.signer3Status), date: c.signer3SignedAt },
         ];
       }
+    }
+
     } else {
       signers = [
         { role: 'AM',   name: c.signer1Name, st: signerStatus(c.signer1Status), label: signerLabel(c.signer1Status), date: c.signer1SignedAt },
@@ -556,7 +551,8 @@ function renderContracts(contracts) {
       ];
     }
     const doneCount = signers.filter(s => s.st === 'done').length;
-    const allDone   = doneCount === 3;
+    const allDone   = doneCount === signers.length;
+
 
     const stepsHtml = signers.map((s, i) => `
       <div class="step ${s.st}">
