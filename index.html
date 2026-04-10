@@ -402,8 +402,8 @@ async function fetchData() {
   const timeoutId  = setTimeout(() => controller.abort(), 30000);
 
   try {
-    const url  = `${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}&region=${currentRegion}`;
-    const res  = await fetch(url, { method: 'GET', signal: controller.signal, cache: 'no-store' });
+    const url  = `${N8N_WEBHOOK_URL}?q=${encodeURIComponent(currentQuery)}&region=${currentRegion}&_t=${Date.now()}`;
+    const res  = await fetch(url, { method: 'GET', signal: controller.signal });
     clearTimeout(timeoutId);
     const json = await res.json();
 
